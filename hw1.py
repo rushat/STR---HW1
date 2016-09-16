@@ -64,34 +64,41 @@ class Learner():
 				hypothesis = self.expertAdvice(i)
 				y_hat = self.predictor(hypothesis,weights)
 				y = self.true_label(hypothesis,weights)
-#				print "yh", y_hat
-#				print "yo", y
+				print "yh", y_hat
+				print "yo", y
 				loss = self.calculateLoss(y,y_hat)
-				weights = self.updateWeights(weights,loss,hypothesis,eta)
+				weights = self.updateWeights(weights,hypothesis,y,eta)
+				print "loss", loss
+				print "weights", weights
 
 	def calculateLoss(self, y,y_hat):
-		l = y_hat - y
+		l = y_hat-y
 		if l ==0:
 			l = 0
 		else:
 			l = 1
-#		print l
 		return l
 
-	def updateWeights(self,w,loss,hypothesis,eta):
+	def updateWeights(self,w,h,y,eta):
+		for i in range(self.experts):
+			loss = self.calculateLoss(y,h[i])
+			if loss != 0:
+				w[i] = w[i]*(1-eta)
 		return w
+
+	def plotGraph():
 
 
 
 def main():
-	T = 10
-	eta = 0.5
+	T = 100
+	eta = 0.1
 	experts = 3
 	"""
 	WMA, RWMA
 	stochastic,deterministic,adversarial
 	"""
-	WMA = Learner("WMA","stochastic", experts)
+	WMA = Learner("WMA","adversarial", experts)
 	WMA.learn(T,eta)
 
 if __name__ == "__main__":
