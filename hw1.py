@@ -2,7 +2,7 @@ import numpy as np
 from random import choice
 import matplotlib.pyplot as plt
 class Learner():
-	def __init__(self, algorithm, label_gen, experts):
+	def __init__(self, algorithm, label_gen, experts,extraExperts):
 		if algorithm == "WMA":
 			self.algorithm = 0
 			self.algorithm_name = algorithm
@@ -23,21 +23,29 @@ class Learner():
 			self.label_name = label_gen
 		else:
 			print "check label generator spelling"
-
+		self.extraExperts = extraExperts
 		self.experts = experts
 		self.weights = [1]*experts
 		self.loss = []
-		self.expert_loss = plot_data = [[] for _ in range(experts)]
-		self.regret = plot_data = [[] for _ in range(experts)]
+		self.expert_loss = [[] for _ in range(experts)]
+		self.regret = [[] for _ in range(experts)]
+		self.avg_regret = []
+		self.features = ["sunny","windy","rainy"]
 		
-	def expertAdvice(self,i):
+	def getWeather(self):
+		random.random()
+
+	def expertAdvice(self,t):
 		h = [0]*self.experts
 		h[0] = 1
 		h[1] = -1
-		if i%2 == 0:	#odd
+		if t%2 == 0:	#odd
 			h[2] = -1
 		else: 			#even
 			h[2] = 1
+		if self.extraExperts:
+
+			h[3]=1
 		return h
 
 	def predictor(self, h, ind):
@@ -70,11 +78,12 @@ class Learner():
 		self.weights = [1]*self.experts
 		phi = 0
 		ind = 0
+		cumulative_loss = [0]*self.experts
 		for i in range(T):
 			hypothesis = self.expertAdvice(i)
 			if self.algorithm == 1:
 				phi = np.sum(self.weights)
-				ind = np.argmax(np.random.multinomial(1, np.divide(self.weights,phi))) 
+				ind = np.argmax(np.random.multinomial(1, np.divide(self.weights,phi)))
 			y_hat = self.predictor(hypothesis,ind)
 			y = self.true_label(hypothesis)
 			loss = self.calculateLoss(y,y_hat)
@@ -82,8 +91,10 @@ class Learner():
 			for ind in range(self.experts):
 				loss_exp = self.calculateLoss(y,hypothesis[ind])
 				self.expert_loss[ind].append(loss_exp)
-				regret = (np.sum(self.loss) - np.sum(self.expert_loss[ind]))/(i+1.)
-				self.regret[ind].append(regret)
+				cumulative_loss[ind] = np.sum(self.expert_loss[ind]) 
+				#regret = (np.sum(self.loss) - np.sum(self.expert_loss[ind]))/(i+1.)
+				#self.regret[ind].append(regret)
+			self.avg_regret.append((np.sum(self.loss) - min(cumulative_loss))/(i+1.))
 			self.weights = self.updateWeights(hypothesis,y,eta)
 			"""print "y_hat", y_hat
 			print "expert 3 prediction",self.expertAdvice(i)[2]
@@ -91,6 +102,7 @@ class Learner():
 			print "loss", loss
 			print "expert3 loss", self.expert_loss[2][-1]
 			print "weights", self.weights"""
+		#print "regrets", self.regret
 		print "Total loss", np.sum(self.loss)
 
 	def calculateLoss(self, y,y_hat):
@@ -122,23 +134,30 @@ class Learner():
 		
 	def plotRegretGraph(self,T):
 		time = np.arange(T)
-		f, axarr = plt.subplots(3, sharex=True)
-		for i in range(self.experts):
-			axarr[i].set_title('Average Regret Plot for {} and {} case'.format(self.algorithm_name, self.label_name))
-			axarr[i].plot(time,self.regret[i], label='Expert{}'.format(i))
-			axarr[i].set_ylabel('avg regret')
-			axarr[i].legend()
-		axarr[i].set_xlabel('time')
+		plt.figure()
+		plt.title('Average Regret Plot for {} and {} case'.format(self.algorithm_name, self.label_name))
+		plt.plot(time,self.avg_regret)
+		plt.ylabel('avg regret')
+		plt.xlabel('time')
+		# f, axarr = plt.subplots(3, sharex=True)
+		# for i in range(self.experts):
+		# 	axarr[i].set_title('Average Regret Plot for {} and {} case'.format(self.algorithm_name, self.label_name))
+		# 	axarr[i].plot(time,self.regret[i], label='Expert{}'.format(i))
+		# 	axarr[i].set_ylabel('avg regret')
+		# 	axarr[i].legend()
+		# axarr[i].set_xlabel('time')
 		
 def main():
 	T = 100
 	eta = 0.1
-	experts = 3
+	
 	allplots = False
-	"""
-	WMA, RWMA
-	stochastic,deterministic,adversarial
-	"""
+	extraExperts = False
+
+	if extraExperts:
+		experts = 4
+	else:
+		experts = 3	
 
 	param1 = ["WMA","RWMA"]
 	param2 = ["stochastic","deterministic","adversarial"]
@@ -146,12 +165,12 @@ def main():
 	if allplots:
 		for i in param1:
 			for j in param2:
-				predict = Learner(i,j, experts)
+				predict = Learner(i,j, experts,extraExperts)
 				predict.learn(T,eta)
 				predict.plotLossGraph(T)
 				predict.plotRegretGraph(T)
 	else:
-		predict = Learner("WMA","stochastic", experts)
+		predict = Learner(param1[0],param2[1], experts,extraExperts)
 		predict.learn(T,eta)
 		predict.plotLossGraph(T)
 		predict.plotRegretGraph(T)
