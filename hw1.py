@@ -77,9 +77,6 @@ class Learner():
 				ind = np.argmax(np.random.multinomial(1, np.divide(self.weights,phi))) 
 			y_hat = self.predictor(hypothesis,ind)
 			y = self.true_label(hypothesis)
-			print "y_hat", y_hat
-			print "expert 3 prediction",self.expertAdvice(i)[2]
-			print "y_actual", y
 			loss = self.calculateLoss(y,y_hat)
 			self.loss.append(loss)
 			for ind in range(self.experts):
@@ -88,9 +85,12 @@ class Learner():
 				regret = (np.sum(self.loss) - np.sum(self.expert_loss[ind]))/(i+1.)
 				self.regret[ind].append(regret)
 			self.weights = self.updateWeights(hypothesis,y,eta)
+			"""print "y_hat", y_hat
+			print "expert 3 prediction",self.expertAdvice(i)[2]
+			print "y_actual", y
 			print "loss", loss
 			print "expert3 loss", self.expert_loss[2][-1]
-			print "weights", self.weights
+			print "weights", self.weights"""
 		print "Total loss", np.sum(self.loss)
 
 	def calculateLoss(self, y,y_hat):
@@ -118,7 +118,7 @@ class Learner():
 			axarr[i].set_ylim([-0.5, 1.5])
 			axarr[i].legend()
 			axarr[i].set_ylabel('loss')
-		axarr[2].set_xlabel('time')
+		axarr[i].set_xlabel('time')
 		
 	def plotRegretGraph(self,T):
 		time = np.arange(T)
@@ -128,29 +128,33 @@ class Learner():
 			axarr[i].plot(time,self.regret[i], label='Expert{}'.format(i))
 			axarr[i].set_ylabel('avg regret')
 			axarr[i].legend()
-		axarr[2].set_xlabel('time')
+		axarr[i].set_xlabel('time')
 		
 def main():
 	T = 100
 	eta = 0.1
 	experts = 3
+	allplots = False
 	"""
 	WMA, RWMA
 	stochastic,deterministic,adversarial
 	"""
+
 	param1 = ["WMA","RWMA"]
 	param2 = ["stochastic","deterministic","adversarial"]
-	"""
-	for i in param1:
-		for j in param2:
-			predict = Learner(i,j, experts)
-			predict.learn(T,eta)
-			predict.plotLossGraph(T)
-			predict.plotRegretGraph(T)"""
-	predict = Learner("WMA","stochastic", experts)
-	predict.learn(T,eta)
-	predict.plotLossGraph(T)
-	predict.plotRegretGraph(T)
+
+	if allplots:
+		for i in param1:
+			for j in param2:
+				predict = Learner(i,j, experts)
+				predict.learn(T,eta)
+				predict.plotLossGraph(T)
+				predict.plotRegretGraph(T)
+	else:
+		predict = Learner("WMA","stochastic", experts)
+		predict.learn(T,eta)
+		predict.plotLossGraph(T)
+		predict.plotRegretGraph(T)
 
 	plt.show()
 
