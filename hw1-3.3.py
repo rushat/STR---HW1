@@ -45,7 +45,6 @@ class Learner():
 				h[3] = 1
 			else:
 				p_win_sunny = (sunny_win_counter*1.)/sunny_counter #from bayes rule
-				print "p_win_sunny",p_win_sunny
 				if p_win_sunny>=0.5:
 					h[3] = 1
 				else:
@@ -56,7 +55,6 @@ class Learner():
 				h[3] = 1
 			else:
 				p_win_not_sunny = (not_sunny_win_counter*1.)/not_sunny_counter
-				print "p_win_not_sunny",p_win_not_sunny
 				if p_win_not_sunny>=0.5:
 					h[3] = 1
 				else:
@@ -121,26 +119,22 @@ class Learner():
 			y = self.true_label(weather)
 			
 			#counter update 
-			if y ==1:
-				win_counter +=1
 			if weather == "sunny":
 				sunny_counter +=1
 				if y==1:
 					sunny_win_counter+=1
+					win_counter +=1
 			else:
 				not_sunny_counter+=1
 				if y==1:
 					not_sunny_win_counter+=1
-			# print "win_counter",win_counter
-			# print "sunny_counter",sunny_counter
-			# print "sunny_win_counter",sunny_win_counter
-			# print "not_sunny_counter",not_sunny_counter
-			# print "not_sunny_win_counter",not_sunny_win_counter
-			if sunny_counter!=0 and not_sunny_counter!=0:
-				p_win_not_sunny = (not_sunny_win_counter*1.)/not_sunny_counter
-				p_win_sunny = (sunny_win_counter*1.)/sunny_counter
-				print "p_win_sunny",p_win_sunny
-				print "p_win_not_sunny",p_win_not_sunny 
+					win_counter +=1
+			
+			# if sunny_counter!=0 and not_sunny_counter!=0:
+			# 	p_win_not_sunny = (not_sunny_win_counter*1.)/not_sunny_counter
+			# 	p_win_sunny = (sunny_win_counter*1.)/sunny_counter
+			# 	print "p_win_sunny",p_win_sunny
+			# 	print "p_win_not_sunny",p_win_not_sunny 
 
 			loss = self.calculateLoss(y,y_hat)
 			self.storeAlgorithmLoss(loss)
@@ -154,8 +148,8 @@ class Learner():
 			print "y_actual", y
 			print "loss", loss
 			print "expert3 loss", self.expert_loss[2][-1]
-			print "weights", self.weights"""
-		#print "regrets", self.regret
+			print "weights", self.weights
+		print "regrets", self.regret"""
 		print "Total loss", np.sum(self.loss)
 
 	def storeAlgorithmLoss(self,loss):
