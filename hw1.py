@@ -28,7 +28,6 @@ class Learner():
 		self.weights = [1]*experts
 		self.loss = []
 		self.expert_loss = [[] for _ in range(experts)]
-		self.regret = [[] for _ in range(experts)]
 		self.avg_regret = []
 		self.features = ["sunny","windy","rainy"]
 		
@@ -139,18 +138,11 @@ class Learner():
 		plt.plot(time,self.avg_regret)
 		plt.ylabel('avg regret')
 		plt.xlabel('time')
-		# f, axarr = plt.subplots(3, sharex=True)
-		# for i in range(self.experts):
-		# 	axarr[i].set_title('Average Regret Plot for {} and {} case'.format(self.algorithm_name, self.label_name))
-		# 	axarr[i].plot(time,self.regret[i], label='Expert{}'.format(i))
-		# 	axarr[i].set_ylabel('avg regret')
-		# 	axarr[i].legend()
-		# axarr[i].set_xlabel('time')
 		
 def main():
 	T = 100
-	eta = 0.1
-	
+	eta = 0.2
+
 	allplots = False
 	extraExperts = False
 
@@ -170,7 +162,7 @@ def main():
 				predict.plotLossGraph(T)
 				predict.plotRegretGraph(T)
 	else:
-		predict = Learner(param1[0],param2[1], experts,extraExperts)
+		predict = Learner(param1[1],param2[0], experts,extraExperts)
 		predict.learn(T,eta)
 		predict.plotLossGraph(T)
 		predict.plotRegretGraph(T)
